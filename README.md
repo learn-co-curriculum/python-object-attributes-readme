@@ -1,32 +1,246 @@
-# Object Orientation
 
-## Overview
+# Object Attributes | Setters & Getters
 
-We'll introduce the concept of Object Oriented Programming (OOP)
+## Introduction
+We have now covered Python classes, instance objects, instance methods, and instance variables. Now that we know what these things are and how they work together, we need to think about how we *want* these parts of our program to work together. Said another way, we need to think about making our programs a bit more secure and prevent users from making unwanted changes or creating bad data. To that effect, we will want to use design patterns for creating private instance variables or defining instance methods that provide ways to update instance variables indirectly. These methods are called setters and getters, because they both read and write (get and set) the private instance variable information we would like to access. Let's get started!
 
-## Object-Oriented Programming (OOP)
+## Objectives
+* Private instance variables
+* Setter and Getter methods
+* Properties
 
-*An object-oriented approach to application development makes programs more intuitive to design, faster to develop, more amenable to modification, and easier to understand.*  
-—[*Object-Oriented Programming with Objective-C*][apple_oop_guide_intro], Apple Inc.
+## Private Instance Variables
+Let's take the example of a bank account. Now, when we think about (or try not to think about) going to the bank and opening an account, terms, fees, and regulations all come to mind. You have to have a minimum balance to open your account, you need to maintain a certain balance, you cannot overdraft your account without incurring a fee, etc. All of those things, current balance, balance minimum, max withdrawal amount, over draft fees can call be thought about as attributes of a bank account. If you know of a bank that doesn't have these *attributes*, **please** let the rest of us know.
 
-[apple_oop_guide_intro]: https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/OOP_ObjC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40005149-CH1-SW2
+Let's build out an OO bank acount for our example to introduce getters, setters, and private variables.
 
-It's natural to wonder, "how can a string of ones and zeroes be referred to as an 'object'?" The use of the word "object" is an abstraction of thought. An "object" in code has no more physical form than does a word in any human language. Sure, words have physical representations: speaking a word causes air to vibrate in a sound wave, ink on a page can be shaped into symbols that represent the word, a meaning can be pointed at or mimed out; but none of these are the word itself. Human language is a system of abstraction: it communicates the *idea* of a thing, but not the thing itself.
 
-![](https://upload.wikimedia.org/wikipedia/en/b/b9/MagrittePipe.jpg)  
-Translation: "This is not a pipe." - [*The Treachery of Images*](https://en.wikipedia.org/wiki/The_Treachery_of_Images), [René Magritte](https://en.wikipedia.org/wiki/Ren%C3%A9_Magritte), 1927  
+```python
+class BankAccount():
+    pass
 
-This image of a pipe is no more a pipe than the word "pipe" is a pipe; in the same way, a code object named `pipe` is not a pipe, but only another form of representing a pipe.
 
->As humans, we’re constantly faced with myriad facts and impressions that we must make sense of. To do so, we must abstract underlying structure away from surface details and discover the fundamental relations at work. Abstractions reveal causes and effects, expose patterns and frameworks, and separate what’s important from what’s not. Object orientation provides an abstraction of the data on which you operate; moreover, it provides a concrete grouping between the data and the operations you can perform with the data—in effect giving the data behavior.  
->—[*Object-Oriented Programming with Objective-C*](https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/OOP_ObjC/Articles/ooOOP.html#//apple_ref/doc/uid/TP40005149-CH8-SW3), Apple Inc.
+new_account = BankAccount()
 
-A code object representing a water pipe (instead of a smoking pipe) might contain values for `length`, `diameter`, `material`, and `manufacturer`. The bundling of these individual pieces of information together begins to form a larger whole.
+new_account.balance = 1000
+new_account.minimum_balance = 250
+new_account.max_withdrawal = 150
+        
+print (vars(new_account))
+```
 
-Object-Oriented Programming, however, does more than just bundle up individual pieces of data that represent a "thing" — it also bundles customized functions that can be performed *on* that data. These are called **methods**: behaviors that an object performs upon its internal data and even upon other code objects.
+We have a new bank account and it's already burning a whole in our digital pockets... So, let's take some money out and go on a shopping spree!
 
-An object in code is a thing with all the data and all the logic required to complete a task. Objects are models and metaphors for the problems we solve in code.
+Uh oh! We just bought a pair of new selvedge denim jeans and bought a round of drinks for our coworkers at a happy hour (cause, why not?), and on top of that we took out some cash to lend to our friend for lunch because they forgot their wallet, but our friend also went to Eleven Madison Park for lunch.
 
-Object-oriented programming was born from the trend of making digital lives reflect our real lives. In the 1970's, [Adele Goldberg](https://en.wikipedia.org/wiki/Adele_Goldberg_%28computer_scientist%29) and [Alan Kay](https://en.wikipedia.org/wiki/Alan_Kay) developed an object-oriented language at Xerox PARC called SmallTalk, which was used in the first personal computer.
 
-Python comes with a few types of Objects to get us started, things like `int` for Integer, `str` for String, `list` for List, etc. We call these base types of Objects "Primitives." But what if we wanted to create a new type in our programming universe, a new kind of object for our code? That's what the `class` keyword and object orientation allows us to do.
+```python
+# new jeans purchase
+new_account.balance -= 250
+# take out cash to fund friends fancy lunch 
+new_account.balance -= 250
+# round of drinks for your whole team
+new_account.balance -= 350
+print(vars(new_account))
+```
+
+Alright, woah. First of all, we need to get our spending under control. Second, we broke all the terms and regulations of our new bank account... So, that's not good. Perhaps if our bank acoount's program was a bit more secure we wouldn't be down $750.
+
+Let's see if we can refactor our BankAccount class to try and enforce the regulations.
+
+First, we don't really want anyone to be able to directly manipulate these attributes. We probably want to create methods that do these actions for us. That way, we are preventing someone from accidentally (or purposefully) breaking a regulation our bank has set for us, and we can use our functions to check if the action we are doing is allowed or not. 
+
+## Setter and Getter Methods
+
+
+```python
+class BankAccount():
+    
+    def set_balance(self, amount):
+        self._balance += amount
+    
+    def get_balance(self):
+        return self._balance
+        
+    def make_withdrawal(self, amount_requested):
+        if (self.check_min_bal(amount_requested)):
+            return self.check_min_bal(amount_requested)
+        if (self.check_max_withdrawal(amount_requested)):
+            return self.check_max_withdrawal(amount_requested)
+        else: 
+            self.set_balance(-amount_requested)
+            return f"${amount_requested}"
+            
+    def check_min_bal(self, amount_requested):
+        if ((self.get_balance() - amount_requested) > self._minimum_balance):
+            return False
+        else:
+            return f"Sorry, you do not have enough funds to withdrawal ${amount_requested} and maintain your minimum balance of ${self._minimum_balance}"
+    
+    def check_max_withdrawal(self, amount_requested):
+        if (self._max_withdrawal > amount_requested):
+            return False
+        else:
+            return f"Sorry, your maximum withdraw amount is {self._max_withdrawal}"
+        
+    def make_deposit(self, amount_to_deposit):
+        try: 
+            (float(amount_to_deposit))
+            self.set_balance((float(amount_to_deposit)))
+            return f"Thank you for the deposit of ${amount_to_deposit}. Your balance is now: ${self._balance}"
+        except:
+            return f"{amount_to_deposit} is not a number"
+
+# just a regular function that makes an account and initializes its properties... what a good idea
+def make_account():
+    new_account = BankAccount()
+    new_account._balance = 0
+    new_account._minimum_balance = 250
+    new_account._max_withdrawal = 150 
+    return new_account
+
+account_two = make_account()
+print("1.", account_two.get_balance())
+print("2.", account_two.set_balance(1000)) # returns None since assignment returns None
+print("3.", account_two.get_balance())
+print("4.", account_two.make_withdrawal(1000))
+print("5.", account_two.make_withdrawal(100))
+print("6.", account_two.make_withdrawal(300))
+print("7.", account_two.make_deposit(250))
+print("8.", account_two.make_deposit(2.50))
+print("9.", account_two.make_deposit("hello"))
+print("10.", vars(account_two))
+```
+
+Okay, so, we now have methods that allow us to change our account balance without having to access the account balance directly. On top of that, we have other instance methods that are preventing someone from making an unwanted or an unallowed action. Note that with our refactored class, we have changed our instance varaibles to have a leading _ which signals that the variable is **private**, or not meant to be accessed directly. 
+
+With the make_withrawal instance method, we are making sure that any amount requested ensures that our minimum account balance is maintained and that we do not exceed our maximum withdrawal allowance. Our make_deposit instance method is checking to see if the input is in fact a number before making the deposit. If we don't make sure our input is a number, we leave ourselves vulnerable to errors, and errors are no good. 
+
+Let's now look at our getter and setter methods, `get_balance` and `set_balance`. Notice that our fucntions that make deposits and make witdrawals are calling the setter and getter methods now instead of accessing the instance variables directly. In fact, the only methods that access the instance variables directly are the setter and getter methods. 
+
+However, we should think about whether it is better to have a method called `get_balance` instead of just `balance`? What about `set_balance`? It would be way easier if we could just have one method to call for both the set and get operations. After all, they are both just changing the balance and naming these functions another way can make it hard to implement a convention. This is where **property()** comes into play. Before we dig too much into what property is, let's look at how it works.
+
+# Properties
+
+
+```python
+class BankAccount():
+    
+    def set_balance(self, amount):
+        print("SETTING BALANCE")
+        self._balance += amount
+    
+    def get_balance(self):
+        print("GETTING BALANCE")
+        return self._balance
+        
+    def make_withdrawal(self, amount_requested):
+        if (self.check_min_bal(amount_requested)):
+            return self.check_min_bal(amount_requested)
+        if (self.check_max_withdrawal(amount_requested)):
+            return self.check_max_withdrawal(amount_requested)
+        else: 
+# ----------- NOTE THE CHANGE FROM self.set_balance(amount) TO self.balance = amount --------------- #
+            self.balance = -amount_requested
+            return f"${amount_requested}"
+            
+    def check_min_bal(self, amount_requested):
+# ----------- NOTE THE CHANGE FROM self.get_balance() TO self.balance = --------------- #
+                if ((self.balance - amount_requested) > self._minimum_balance): 
+            return False
+        else:
+            return f"Sorry, you do not have enough funds to withdrawal ${amount_requested} and maintain your minimum balance of ${self._minimum_balance}"
+    
+    def check_max_withdrawal(self, amount_requested):
+        if (self._max_withdrawal > amount_requested):
+            return False
+        else:
+            return f"Sorry, your maximum withdraw amount is {self._max_withdrawal}"
+        
+    def make_deposit(self, amount_to_deposit):
+        try: 
+            (float(amount_to_deposit))
+# ----------- NOTE THE CHANGE FROM self.set_balance(amount) TO self.balance = amount --------------- #
+            self.balance = float(amount_to_deposit)
+            return f"Thank you for the deposit of ${amount_to_deposit}. Your balance is now: ${self._balance}"
+        except:
+            return f"{amount_to_deposit} is not a number"
+    
+    balance = property(get_balance, set_balance)
+
+# just a non-class function that makes an account and initializes its properties... what a good idea
+def make_account():
+    new_account = BankAccount()
+    new_account._balance = 0
+    new_account._minimum_balance = 250
+    new_account._max_withdrawal = 150 
+    return new_account
+
+account_three = make_account()
+print("1.", account_three.get_balance())
+print("2.", account_three.set_balance(1000)) # returns None since assignment returns None
+print("3.", account_three.get_balance())
+print("4.", account_three.make_withdrawal(1000))
+print("5.", account_three.make_withdrawal(100))
+print("6.", account_three.make_withdrawal(300))
+print("7.", account_three.make_deposit(250))
+print("8.", account_three.make_deposit(2.50))
+print("9.", account_three.make_deposit("hello"))
+print("10.", vars(account_three))
+```
+
+It is important to look closely at what has changed in our new class. We've added comments to point out the notable differences between our previous BankAccount class and this one. We also added print statements so that we can clearly see that our 'get_balance' and 'set_balance' methods are getting called even after we create our new balance *property*.
+
+Now, that we are using **property()**, we can refer to our setter and getter methods as the same name, `balance`. However, note that when we use `balance` to get and set our bank account's balance, we do **NOT** invoke the function. In fact our `balance` property getter and setter looks like our original instance variable, `balance`. That is exactly what we wanted! 
+
+How does our balance property know how to handle when to get or when to set? Well, let's look at the method signature for property()
+
+```python
+property(fget=None, fset=None, fdel=None, doc=None)
+# fget is our getter method
+# fset is our setter method
+# fdel is our delete method
+# doc is like a string, but we don't need to worry about this argument right now
+```
+
+The property( ) function returns a property object, which has three methods, getter( ), setter( ), and delete( ). Theses each are capable of assigning methods to get, set, and delete an attribute of an isntance object. So, our notation can actually be broken down a bit. Let's take a look:
+
+```python
+# balance is now a **property object**
+balance = property(get_balance, set_balance)
+
+    TO
+
+# balance is now a **property object**
+balance = property()
+balance.getter = get_balance
+balance.setter = set_balance
+```
+
+Now when we try to perform assigment, our property calls the *setter* method, and when we try to simply invoke the property without assigning or deleting, our property invokes the *getter* method. 
+
+
+```python
+class Example():
+    
+    def hello(self):
+        return "hi"
+    
+    def bye(self, other_greeting):
+        return other_greeting
+    
+    greeting = property(hello, bye)
+    
+example = Example()
+bye = example.greeting = "BYE"
+print(example.greeting)
+print(bye)
+```
+
+    hi
+    BYE
+
+
+## Summary
+
+SUMMARY
