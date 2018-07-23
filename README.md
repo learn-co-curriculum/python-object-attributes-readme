@@ -219,28 +219,6 @@ balance.setter = set_balance
 
 Now when we try to perform assigment, our property calls the *setter* method, and when we try to simply invoke the property without assigning or deleting, our property invokes the *getter* method. 
 
-
-```python
-class Example():
-    
-    def hello(self):
-        return "hi"
-    
-    def bye(self, other_greeting):
-        return other_greeting
-    
-    greeting = property(hello, bye)
-    
-example = Example()
-bye = example.greeting = "BYE"
-print(example.greeting)
-print(bye)
-```
-
-    hi
-    BYE
-
-
 ## Summary
 
-SUMMARY
+In this lab, we introduced Python class design patterns for using private instance variables, getter and setter instance methods, as well as using the property function to create property objects. By prepending an underscore to an instance variable, we are indicating that this variable should be treated as a private instance variable and that it should only be accessed through a getter or setter method instead of direct access. By using getter and setter methods we are able to build in validations for our instance variables ensuring that they remain the datatype and value range that we expect in our program. To make our program even more intuitive we can use property objects to encapsulate our getter and setter methods into a single object. We then are able to invoke these methods as if they were an instance variable, with the added bonus that we are using our getter and setter methods to interact with the actual instance variable.
