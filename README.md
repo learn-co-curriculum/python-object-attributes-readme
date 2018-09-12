@@ -50,7 +50,32 @@ Let's see if we can refactor our BankAccount class to try and enforce the regula
 
 First, we don't really want anyone to be able to directly manipulate these attributes. We probably want to create methods that do these actions for us. That way, we are preventing someone from accidentally (or purposefully) breaking a regulation our bank has set for us, and we can use our functions to check if the action we are doing is allowed or not. 
 
+First, we should make it so that accessing these attributes like the account `balance` isn't so straightforward by using **private** instance variables. Private instance variables are declared by prepending an underscore `_` (i.e. `_balance`).
+
+Note that the underscore only **indicates** that the instance variable is private. It does **not** change our ability to access or change its value. However, we can now safely define an instance method with the name of our intended attribute (i.e. `def balance(self):`) and it will not conflict or be confused with the instance variable `balance`.
+
+
+```python
+class BankAccount():
+    pass
+
+
+new_account = BankAccount()
+
+new_account._balance = 1000 # now indicated to be a *private* instance variable 
+new_account._minimum_balance = 250 # now indicated to be a *private* instance variable
+new_account._max_withdrawal = 150 # now indicated to be a *private* instance variable
+        
+print (vars(new_account))
+```
+
+Great! We have our instance variables set up so that we are indicating that they are *private* and therefore should not be accessed directly by a user or another program. Instead, to update these attributes we'll need intance methods called **setters and getters**.
+
 ## Setter and Getter Methods
+
+Setter and getter methods are instance methods that control the access (getter) of instance variables and the changing (setter) of instance variables. Like we said earlier, we will have programs where we want to guard against unintended behavior, bad data, etc. (i.e. withdrawing too much money from our bank).
+
+To reinforce the private nature of our instance variables as well as create ways to make our program more dynamic and well structured, we implement these setter and getter methods. Remember, anything that **changes** an instance variable is a **setter** method. Anything that **only accesses** an instance variable is a **getter** method. Take a look at the example below:
 
 
 ```python
@@ -112,15 +137,14 @@ print("9.", account_two.make_deposit("hello"))
 print("10.", vars(account_two))
 ```
 
-Okay, so, we now have methods that allow us to change our account balance without having to access the account balance directly. On top of that, we have other instance methods that are preventing someone from making an unwanted or an unallowed action. Note that with our refactored class, we have changed our instance varaibles to have a leading _ which signals that the variable is **private**, or not meant to be accessed directly. 
+Okay, so, we now have methods that allow us to change our account balance without having to access the account balance directly. On top of that, we have other instance methods that are preventing someone from making an unwanted or an unallowed action. Note that with our refactored class, we have changed our instance varaibles to have a leading `_` to signify that the variable is **private**.
 
-With the make_withrawal instance method, we are making sure that any amount requested ensures that our minimum account balance is maintained and that we do not exceed our maximum withdrawal allowance. Our make_deposit instance method is checking to see if the input is in fact a number before making the deposit. If we don't make sure our input is a number, we leave ourselves vulnerable to errors, and errors are no good. 
+With the `make_withrawal` instance method, we are making sure that any amount requested ensures that our minimum account balance is maintained and that we do not exceed our maximum withdrawal allowance. Our `make_deposit` instance method is checking to see if the input is in fact a number before making the deposit. If we don't make sure our input is a number, we leave ourselves vulnerable to errors, and errors are no good. 
 
-Let's now look at our getter and setter methods, `get_balance` and `set_balance`. Notice that our fucntions that make deposits and make witdrawals are calling the setter and getter methods now instead of accessing the instance variables directly. In fact, the only methods that access the instance variables directly are the setter and getter methods. 
-
-However, we should think about whether it is better to have a method called `get_balance` instead of just `balance`? What about `set_balance`? It would be way easier if we could just have one method to call for both the set and get operations. After all, they are both just changing the balance and naming these functions another way can make it hard to implement a convention. This is where **property()** comes into play. Before we dig too much into what property is, let's look at how it works.
+Let's now look at our getter and setter methods, `get_balance` and `set_balance`. Notice that our fucntions that make deposits and make witdrawals are calling the setter and getter methods now instead of accessing the instance variables directly. In fact, the only methods that accesses the instance variables directly are the setter and getter methods, `set_balance` and `get_balance`. 
 
 # Properties
+Now that we have our private instance variables and setter and getter methods, we should think about whether it is better to have a method called `get_balance` or a method called just `balance`? What about `set_balance`? It would be way easier if we could just have one method to call for both the set and get operations. After all, they are both just changing the balance and naming these functions another way can make it hard to implement a convention. This is where **property()** comes into play. Before we dig too much into what property is, let's look at how it works in the example below:
 
 
 ```python
@@ -166,8 +190,11 @@ class BankAccount():
         except:
             return f"{amount_to_deposit} is not a number"
     
+# ----------- HERE is where we are using the property() function ----------------------------------- #
     balance = property(get_balance, set_balance)
 
+    
+    
 # just a non-class function that makes an account and initializes its properties... what a good idea
 def make_account():
     new_account = BankAccount()
@@ -203,7 +230,7 @@ property(fget=None, fset=None, fdel=None, doc=None)
 # doc is like a string, but we don't need to worry about this argument right now
 ```
 
-The property( ) function returns a property object, which has three methods, getter( ), setter( ), and delete( ). Theses each are capable of assigning methods to get, set, and delete an attribute of an isntance object. So, our notation can actually be broken down a bit. Let's take a look:
+The `property()` function returns a property object, which has three methods, `getter()`, `setter()`, and `delete()`. Theses each are capable of assigning methods to get, set, and delete an attribute of an isntance object. So, our notation can actually be broken down a bit. Let's take a look:
 
 ```python
 # balance is now a **property object**
@@ -217,7 +244,7 @@ balance.getter = get_balance
 balance.setter = set_balance
 ```
 
-Now when we try to perform assigment, our property calls the *setter* method, and when we try to simply invoke the property without assigning or deleting, our property invokes the *getter* method. 
+Now when we try to perform **assigment**, our property calls the **setter** method, and when we try to simply **access** the property without assigning or deleting, our property invokes the **getter** method. 
 
 ## Summary
 
